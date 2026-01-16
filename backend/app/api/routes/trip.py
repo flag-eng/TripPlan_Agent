@@ -41,7 +41,7 @@ async def plan_trip(request: TripRequest):
 
         # 生成旅行计划
         print("🚀 开始生成旅行计划...")
-        trip_plan = agent.plan_trip(request)
+        trip_plan =await agent.plan_trip(request)
 
         print("✅ 旅行计划生成成功,准备返回响应\n")
 

@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import List
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
+from typing import List, Optional
 
 # 加载环境变量
 # 首先尝试加载当前目录的.env
@@ -24,9 +25,12 @@ class Settings(BaseSettings):
     app_version: str = "1.0.0"
     debug: bool = False
 
+
     # 服务器配置
     host: str = "0.0.0.0"
     port: int = 8000
+    http_proxy: Optional[str] = "http://127.0.0.1:10808"
+    https_proxy: Optional[str] = "http://127.0.0.1:10808"
 
     # CORS配置 - 使用字符串,在代码中分割
     cors_origins: str = "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:3000"
@@ -39,7 +43,7 @@ class Settings(BaseSettings):
     unsplash_secret_key: str = "FOKgHsmz6yBGqMFxr5y_8YlDKMt7pnx4wJVpayDKGrM"
 
     # LLM配置 (Gemini)
-    gemini_api_key: str = "AIzaSyDF8AvRqE8Cl33-8oOxJWXJ9mXdbRRh5DI"
+    gemini_api_key: str = "AIzaSyAXM6gcijKyB2UJo6DDUWBjdWhGxkH0JaY"
     gemini_model: str = "gemini-2.5-flash"
 
     # 日志配置
@@ -57,6 +61,11 @@ class Settings(BaseSettings):
 
 # 创建全局配置实例
 settings = Settings()
+
+if settings.http_proxy:
+    os.environ["http_proxy"] = settings.http_proxy
+if settings.https_proxy:
+    os.environ["https_proxy"] = settings.https_proxy
 
 
 def get_settings() -> Settings:
@@ -97,6 +106,7 @@ def print_config():
     print(f"版本: {settings.app_version}")
     print(f"服务器: {settings.host}:{settings.port}")
     print(f"高德地图API Key: {'已配置' if settings.amap_api_key else '未配置'}")
+    print(f"代理已设置: {os.environ.get('http_proxy')}")
 
     # 检查LLM配置
     gemini_api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY") or settings.gemini_api_key

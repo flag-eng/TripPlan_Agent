@@ -1,3 +1,4 @@
+'''
 import os
 import google.generativeai as genai
 
@@ -16,4 +17,16 @@ try:
         if 'generateContent' in m.supported_generation_methods:
             print(f"- {m.name}")
 except Exception as e:
-    print(f"发生错误: {e}")
+    print(f"发生错误: {e}")'''
+
+from langchain_core.prompts import PromptTemplate
+
+# 1. 定义带双花括号的模板
+template = (""""```json
+            这是一个JSON示例: { \"key\": \"value\" }
+            ```""")
+prompt = PromptTemplate.from_template(template)
+
+# 2. 打印渲染后的结果 (这才是发给 LLM 的内容)
+print(prompt.format())
+# 输出结果: 这是一个JSON示例: { "key": "value" }

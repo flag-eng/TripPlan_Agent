@@ -70,7 +70,6 @@ async def get_amap_tools() -> List[Tool]:
             # 真正的清理应该在应用关闭时调用 cleanup_mcp_client
             # 只有当工具列表为空(首次初始化)时才建立连接，避免重复连接
             # 注意: MultiServerMCPClient 内部会管理连接状态，但在单例模式下，显式调用一次较安全
-            await mcp_client.__aenter__()
 
             # 使用 get_tools() 获取工具
             # 这会自动从MCP服务器发现所有可用工具并转换为LangChain Tool
@@ -150,7 +149,6 @@ async def cleanup_mcp_client():
     global _mcp_client
     if _mcp_client:
         try:
-            await _mcp_client.__aexit__(None, None, None)
             print("✅ MCP客户端连接已关闭")
         except Exception as e:
             print(f"⚠️ 关闭MCP客户端时发生错误: {e}")

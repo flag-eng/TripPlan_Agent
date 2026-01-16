@@ -75,47 +75,47 @@ PLANNER_AGENT_PROMPT = """你是行程规划专家。你的任务是根据景点
 
 请严格按照以下JSON格式返回旅行计划:
 ```json
-{
+{{
   "city": "城市名称",
   "start_date": "YYYY-MM-DD",
   "end_date": "YYYY-MM-DD",
   "days": [
-    {
+    {{
       "date": "YYYY-MM-DD",
       "day_index": 0,
       "description": "第1天行程概述",
       "transportation": "交通方式",
       "accommodation": "住宿类型",
-      "hotel": {
+      "hotel": {{
         "name": "酒店名称",
         "address": "酒店地址",
-        "location": {"longitude": 116.397128, "latitude": 39.916527},
+        "location": {{"longitude": 116.397128, "latitude": 39.916527}},
         "price_range": "300-500元",
         "rating": "4.5",
         "distance": "距离景点2公里",
         "type": "经济型酒店",
         "estimated_cost": 400
-      },
+      }},
       "attractions": [
-        {
+        {{
           "name": "景点名称",
           "address": "详细地址",
-          "location": {"longitude": 116.397128, "latitude": 39.916527},
+          "location": {{"longitude": 116.397128, "latitude": 39.916527}},
           "visit_duration": 120,
           "description": "景点详细描述",
           "category": "景点类别",
           "ticket_price": 60
-        }
+        }}
       ],
       "meals": [
-        {"type": "breakfast", "name": "早餐推荐", "description": "早餐描述", "estimated_cost": 30},
-        {"type": "lunch", "name": "午餐推荐", "description": "午餐描述", "estimated_cost": 50},
-        {"type": "dinner", "name": "晚餐推荐", "description": "晚餐描述", "estimated_cost": 80}
+        {{"type": "breakfast", "name": "早餐推荐", "description": "早餐描述", "estimated_cost": 30}},
+        {{"type": "lunch", "name": "午餐推荐", "description": "午餐描述", "estimated_cost": 50}},
+        {{"type": "dinner", "name": "晚餐推荐", "description": "晚餐描述", "estimated_cost": 80}}
       ]
-    }
+    }}
   ],
   "weather_info": [
-    {
+    {{
       "date": "YYYY-MM-DD",
       "day_weather": "晴",
       "night_weather": "多云",
@@ -123,17 +123,17 @@ PLANNER_AGENT_PROMPT = """你是行程规划专家。你的任务是根据景点
       "night_temp": 15,
       "wind_direction": "南风",
       "wind_power": "1-3级"
-    }
+    }}
   ],
   "overall_suggestions": "总体建议",
-  "budget": {
+  "budget": {{
     "total_attractions": 180,
     "total_hotels": 1200,
     "total_meals": 480,
     "total_transportation": 200,
     "total": 2060
-  }
-}
+  }}
+}}
 ```
 
 **重要提示:**
@@ -265,16 +265,25 @@ class MultiAgentTripPlanner:
             class SimpleAgentExecutor:
                 def __init__(self, chain):
                     self.chain = chain
-                
+
+                # 同步调用
                 def invoke(self, input_data):
                     result = self.chain.invoke(input_data)
+                    return self._format_output(result)
+
+                # 添加 ainvoke 支持
+                async def ainvoke(self, input_data):
+                    result = await self.chain.ainvoke(input_data)
+                    return self._format_output(result)
+
+                def _format_output(self, result):
                     if isinstance(result, dict):
-                        return result.get("output", str(result))
+                        return result
                     return {"output": str(result)}
             
             return SimpleAgentExecutor(chain)
     
-    def plan_trip(self, request: TripRequest) -> TripPlan:
+    async def plan_trip(self, request: TripRequest) -> TripPlan:
         """
         使用多智能体协作生成旅行计划
 
@@ -296,28 +305,28 @@ class MultiAgentTripPlanner:
             # 步骤1: 景点搜索Agent搜索景点
             print("📍 步骤1: 搜索景点...")
             attraction_query = self._build_attraction_query(request)
-            attraction_response = self.attraction_agent.invoke({"input": attraction_query})
+            attraction_response =await self.attraction_agent.ainvoke({"input": attraction_query})
             attraction_result = attraction_response.get("output", str(attraction_response))
             print(f"景点搜索结果: {attraction_result[:200]}...\n")
 
             # 步骤2: 天气查询Agent查询天气
             print("🌤️  步骤2: 查询天气...")
-            weather_query = f"请查询{request.city}的天气信息"
-            weather_response = self.weather_agent.invoke({"input": weather_query})
+            weather_query = f"请查询{request.city}从{request.start_date} 至 {request.end_date}的天气信息"
+            weather_response =await self.weather_agent.ainvoke({"input": weather_query})
             weather_result = weather_response.get("output", str(weather_response))
             print(f"天气查询结果: {weather_result[:200]}...\n")
 
             # 步骤3: 酒店推荐Agent搜索酒店
             print("🏨 步骤3: 搜索酒店...")
             hotel_query = f"请搜索{request.city}的{request.accommodation}酒店"
-            hotel_response = self.hotel_agent.invoke({"input": hotel_query})
+            hotel_response =await self.hotel_agent.ainvoke({"input": hotel_query})
             hotel_result = hotel_response.get("output", str(hotel_response))
             print(f"酒店搜索结果: {hotel_result[:200]}...\n")
 
             # 步骤4: 行程规划Agent整合信息生成计划
             print("📋 步骤4: 生成行程计划...")
             planner_query = self._build_planner_query(request, attraction_result, weather_result, hotel_result)
-            planner_response = self.planner_agent.invoke({"input": planner_query})
+            planner_response =await self.planner_agent.ainvoke({"input": planner_query})
             planner_result = planner_response.get("output", str(planner_response))
             print(f"行程规划结果: {planner_result[:300]}...\n")
 
