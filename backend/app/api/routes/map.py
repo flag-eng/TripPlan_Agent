@@ -41,7 +41,7 @@ async def search_poi(
         service = get_amap_service()
         
         # 搜索POI
-        pois = service.search_poi(keywords, city, citylimit)
+        pois =await service.search_poi(keywords, city, citylimit)
         
         return POISearchResponse(
             success=True,
@@ -80,7 +80,7 @@ async def get_weather(
         service = get_amap_service()
         
         # 查询天气
-        weather_info = service.get_weather(city)
+        weather_info =await service.get_weather(city)
         
         return WeatherResponse(
             success=True,
@@ -117,7 +117,7 @@ async def plan_route(request: RouteRequest):
         service = get_amap_service()
         
         # 规划路线
-        route_info = service.plan_route(
+        route_info =await service.plan_route(
             origin_address=request.origin_address,
             destination_address=request.destination_address,
             origin_city=request.origin_city,
@@ -148,7 +148,7 @@ async def health_check():
     """健康检查"""
     try:
         # 检查服务是否可用
-        service = get_amap_service()
+        service =await get_amap_service()
         
         # 获取工具列表
         import asyncio

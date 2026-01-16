@@ -155,6 +155,14 @@ class MultiAgentTripPlanner:
     """多智能体旅行规划系统"""
 
     def __init__(self):
+        self.llm = None
+        self.amap_tools = []
+        self.attraction_agent = None
+        self.weather_agent = None
+        self.hotel_agent = None
+        self.planner_agent = None
+
+    async def initialize(self):
         """初始化多智能体系统"""
         print("🔄 开始初始化多智能体旅行规划系统...")
 
@@ -164,8 +172,7 @@ class MultiAgentTripPlanner:
 
             # 获取高德地图工具
             print("  - 创建共享工具...")
-            import asyncio
-            self.amap_tools = asyncio.run(get_amap_tools())
+            self.amap_tools = await get_amap_tools()
 
             # 创建景点搜索Agent
             print("  - 创建景点搜索Agent...")
@@ -468,13 +475,13 @@ class MultiAgentTripPlanner:
 # 全局多智能体系统实例
 _multi_agent_planner = None
 
-
-def get_trip_planner_agent() -> MultiAgentTripPlanner:
-    """获取多智能体旅行规划系统实例(单例模式)"""
+async def get_trip_planner_agent() -> MultiAgentTripPlanner:
+    """获取多智能体旅行规划系统实例(异步单例模式)"""
     global _multi_agent_planner
 
     if _multi_agent_planner is None:
         _multi_agent_planner = MultiAgentTripPlanner()
+        await _multi_agent_planner.initialize() # 显式调用异步初始化
 
     return _multi_agent_planner
 

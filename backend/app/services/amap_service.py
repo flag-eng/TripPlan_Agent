@@ -4,7 +4,6 @@ from typing import List, Dict, Any, Optional
 from ..config import get_settings
 from ..models.schemas import Location, POIInfo, WeatherInfo
 from .langchain_tools import call_tool
-import asyncio
 
 
 class AmapService:
@@ -14,7 +13,7 @@ class AmapService:
         """初始化服务"""
         pass
     
-    def search_poi(self, keywords: str, city: str, citylimit: bool = True) -> List[POIInfo]:
+    async def search_poi(self, keywords: str, city: str, citylimit: bool = True) -> List[POIInfo]:
         """
         搜索POI
         
@@ -28,14 +27,14 @@ class AmapService:
         """
         try:
             # 调用MCP工具
-            result = asyncio.run(call_tool(
+            result = await call_tool (
                 "maps_text_search",
                 {
                     "keywords": keywords,
                     "city": city,
                     "citylimit": str(citylimit).lower()
                 }
-            ))
+            )
             
             # 解析结果
             # 注意: MCP工具返回的是字符串,需要解析
@@ -49,7 +48,7 @@ class AmapService:
             print(f"❌ POI搜索失败: {str(e)}")
             return []
     
-    def get_weather(self, city: str) -> List[WeatherInfo]:
+    async def get_weather(self, city: str) -> List[WeatherInfo]:
         """
         查询天气
         
@@ -61,10 +60,10 @@ class AmapService:
         """
         try:
             # 调用MCP工具
-            result = asyncio.run(call_tool(
+            result = await call_tool(
                 "maps_weather",
                 {"city": city}
-            ))
+            )
             
             print(f"天气查询结果: {result[:200]}...")
             
@@ -75,7 +74,7 @@ class AmapService:
             print(f"❌ 天气查询失败: {str(e)}")
             return []
     
-    def plan_route(
+    async def plan_route(
         self,
         origin_address: str,
         destination_address: str,
@@ -126,10 +125,10 @@ class AmapService:
                     arguments["destination_city"] = destination_city
             
             # 调用MCP工具
-            result = asyncio.run(call_tool(
+            result = await call_tool(
                 tool_name,
                 arguments
-            ))
+            )
             
             print(f"路线规划结果: {result[:200]}...")
             
@@ -140,7 +139,7 @@ class AmapService:
             print(f"❌ 路线规划失败: {str(e)}")
             return {}
     
-    def geocode(self, address: str, city: Optional[str] = None) -> Optional[Location]:
+    async def geocode(self, address: str, city: Optional[str] = None) -> Optional[Location]:
         """
         地理编码(地址转坐标)
 
@@ -156,10 +155,10 @@ class AmapService:
             if city:
                 arguments["city"] = city
 
-            result = asyncio.run(call_tool(
+            result = await call_tool(
                 "maps_geo",
                 arguments
-            ))
+            )
 
             print(f"地理编码结果: {result[:200]}...")
 
@@ -170,7 +169,7 @@ class AmapService:
             print(f"❌ 地理编码失败: {str(e)}")
             return None
 
-    def get_poi_detail(self, poi_id: str) -> Dict[str, Any]:
+    async def get_poi_detail(self, poi_id: str) -> Dict[str, Any]:
         """
         获取POI详情
 
@@ -181,10 +180,10 @@ class AmapService:
             POI详情信息
         """
         try:
-            result = asyncio.run(call_tool(
+            result = await call_tool(
                 "maps_search_detail",
                 {"id": poi_id}
-            ))
+            )
 
             print(f"POI详情结果: {result[:200]}...")
 

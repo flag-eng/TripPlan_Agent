@@ -37,7 +37,7 @@ async def plan_trip(request: TripRequest):
 
         # 获取Agent实例
         print("🔄 获取多智能体系统实例...")
-        agent = get_trip_planner_agent()
+        agent = await get_trip_planner_agent()
 
         # 生成旅行计划
         print("🚀 开始生成旅行计划...")
@@ -70,7 +70,7 @@ async def health_check():
     """健康检查"""
     try:
         # 检查Agent是否可用
-        agent = get_trip_planner_agent()
+        agent = await get_trip_planner_agent()
         
         return {
             "status": "healthy",
