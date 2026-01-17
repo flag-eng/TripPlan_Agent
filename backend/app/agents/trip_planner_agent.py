@@ -4,7 +4,7 @@ import json
 from typing import Dict, Any, List
 from langchain_classic.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from ..services.llm_service import get_llm
+from ..services.llm_service import get_llm_nvidia
 from ..services.langchain_tools import get_amap_tools
 from ..models.schemas import TripRequest, TripPlan, DayPlan, Attraction, Meal, WeatherInfo, Location, Hotel
 from ..config import get_settings
@@ -168,7 +168,7 @@ class MultiAgentTripPlanner:
 
         try:
             settings = get_settings()
-            self.llm = get_llm()
+            self.llm = get_llm_nvidia()
 
             # 获取高德地图工具
             print("  - 创建共享工具...")
@@ -307,28 +307,28 @@ class MultiAgentTripPlanner:
             attraction_query = self._build_attraction_query(request)
             attraction_response =await self.attraction_agent.ainvoke({"input": attraction_query})
             attraction_result = attraction_response.get("output", str(attraction_response))
-            print(f"景点搜索结果: {attraction_result[:200]}...\n")
+            print(f"景点搜索结果: {attraction_result}...\n")
 
             # 步骤2: 天气查询Agent查询天气
             print("🌤️  步骤2: 查询天气...")
             weather_query = f"请查询{request.city}从{request.start_date} 至 {request.end_date}的天气信息"
             weather_response =await self.weather_agent.ainvoke({"input": weather_query})
             weather_result = weather_response.get("output", str(weather_response))
-            print(f"天气查询结果: {weather_result[:200]}...\n")
+            print(f"天气查询结果: {weather_result}...\n")
 
             # 步骤3: 酒店推荐Agent搜索酒店
             print("🏨 步骤3: 搜索酒店...")
             hotel_query = f"请搜索{request.city}的{request.accommodation}酒店"
             hotel_response =await self.hotel_agent.ainvoke({"input": hotel_query})
             hotel_result = hotel_response.get("output", str(hotel_response))
-            print(f"酒店搜索结果: {hotel_result[:200]}...\n")
+            print(f"酒店搜索结果: {hotel_result}...\n")
 
             # 步骤4: 行程规划Agent整合信息生成计划
             print("📋 步骤4: 生成行程计划...")
             planner_query = self._build_planner_query(request, attraction_result, weather_result, hotel_result)
             planner_response =await self.planner_agent.ainvoke({"input": planner_query})
             planner_result = planner_response.get("output", str(planner_response))
-            print(f"行程规划结果: {planner_result[:300]}...\n")
+            print(f"行程规划结果: {planner_result}...\n")
 
             # 解析最终计划
             trip_plan = self._parse_response(planner_result, request)
@@ -493,4 +493,3 @@ async def get_trip_planner_agent() -> MultiAgentTripPlanner:
         await _multi_agent_planner.initialize() # 显式调用异步初始化
 
     return _multi_agent_planner
-

@@ -43,8 +43,11 @@ class Settings(BaseSettings):
     unsplash_secret_key: str = "FOKgHsmz6yBGqMFxr5y_8YlDKMt7pnx4wJVpayDKGrM"
 
     # LLM配置 (Gemini)
-    gemini_api_key: str = "AIzaSyAXM6gcijKyB2UJo6DDUWBjdWhGxkH0JaY"
-    gemini_model: str = "gemini-2.5-flash"
+    gemini_api_key: str = "xxxxxxxxxxxxxxxxxx"
+    gemini_model: str = "gemma-3-27b-it"
+
+    nvidia_api_key: str = "xxxxxxxxxxxxxxx"
+    nvidia_model: str = "meta/llama-3.3-70b-instruct"
 
     # 日志配置
     log_level: str = "INFO"
