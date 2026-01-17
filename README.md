@@ -1,3 +1,14 @@
+# 基于HelloAgents改写的langchain框架旅行助手
+model应用llama3.3
+
+后端框架由helloagent改写为Langchain框架
+
+mcp采用高德地图
+
+前端部分应用原版Vue，以下是原ReadMe
+
+
+
 # HelloAgents智能旅行助手 🌍✈️
 
 基于HelloAgents框架构建的智能旅行规划助手,集成高德地图MCP服务,提供个性化的旅行计划生成。
